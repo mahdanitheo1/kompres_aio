@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kompres Foto dan PDF</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="wrap">
+  <header>
+    <h1>Kompres Foto dan PDF</h1>
+    <p class="lede">Kecilkan ukuran foto (JPG, PNG, WebP, atau ZIP berisi foto) dan file PDF sampai di bawah batas KB yang Anda tentukan. Semua diproses di browser Anda, file tidak diunggah ke server mana pun.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Menu">
+    <button type="button" class="tab" role="tab" id="tab-foto" aria-selected="true" aria-controls="view-foto">Kompres Foto</button>
+    <button type="button" class="tab" role="tab" id="tab-pdf" aria-selected="false" aria-controls="view-pdf" tabindex="-1">Kompres PDF</button>
+  </nav>
+
+  <!-- VIEW FOTO -->
+  <div class="view" id="view-foto" role="tabpanel" aria-labelledby="tab-foto">
+    <section class="panel" aria-label="Pengaturan">
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept="image/*,.zip,application/zip,application/x-zip-compressed" multiple>
+        <svg width="44" height="44" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="7" width="30" height="26" rx="4"/><circle cx="14" cy="16" r="2.5"/><path d="M5 28l9-8 7 6 5-4 9 8"/></svg>
+        <span class="big">Tarik foto ke sini</span>
+        <span class="sub">atau pilih dari perangkat Anda</span>
+        <span class="fake-btn">Pilih foto</span>
+        <span class="formats">JPG, JPEG, PNG, WebP, GIF, BMP, AVIF, atau satu file ZIP berisi banyak foto.</span>
+      </label>
+
+      <div class="controls">
+        <div class="field">
+          <label class="label" for="kb">Ukuran maksimum</label>
+          <div class="kbrow"><input id="kb" type="number" min="5" max="20000" step="1" value="200" inputmode="numeric"><span class="unit">KB</span></div>
+          <input id="kbRange" type="range" min="0" max="100" step="0.5" aria-label="Geser untuk mengubah ukuran maksimum">
+          <div class="chips" id="chips">
+            <button type="button" class="chip" data-kb="50">50 KB</button>
+            <button type="button" class="chip" data-kb="100">100 KB</button>
+            <button type="button" class="chip" data-kb="200">200 KB</button>
+            <button type="button" class="chip" data-kb="500">500 KB</button>
+            <button type="button" class="chip" data-kb="1024">1 MB</button>
+            <button type="button" class="chip" data-kb="2048">2 MB</button>
+          </div>
+        </div>
+
+        <fieldset class="field">
+          <legend class="label">Format hasil</legend>
+          <div class="seg">
+            <label><input type="radio" name="fmt" value="auto" checked><span>Asli</span></label>
+            <label><input type="radio" name="fmt" value="jpeg"><span>JPEG</span></label>
+            <label><input type="radio" name="fmt" value="webp"><span>WebP</span></label>
+            <label><input type="radio" name="fmt" value="png"><span>PNG</span></label>
+          </div>
+          <p class="hint" id="fmtHint"></p>
+        </fieldset>
+
+        <div class="two">
+          <div class="field">
+            <label class="label" for="maxDim">Sisi terpanjang maks.</label>
+            <div class="px"><input id="maxDim" type="number" min="64" max="12000" step="1" placeholder="Asli" inputmode="numeric"><span>px</span></div>
+          </div>
+          <label class="check" for="resize">
+            <input type="checkbox" id="resize" checked>
+            <span><b>Perkecil dimensi otomatis</b><small>Dimensi dikurangi bila kualitas saja belum cukup. Jika dimatikan, batas bisa tidak tercapai.</small></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Hasil" style="display:grid;gap:12px">
+      <div class="results-head">
+        <h2>Hasil <span class="totals" id="count"></span></h2>
+        <div class="actions">
+          <button type="button" class="btn primary" id="zipBtn">Simpan semua (.zip)</button>
+          <button type="button" class="btn" id="clearBtn">Bersihkan</button>
+        </div>
+      </div>
+      <div class="totals" id="totals" aria-live="polite"></div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="lg-o"></i>Ukuran asli</span>
+        <span><i class="lg-n"></i>Ukuran hasil</span>
+        <span><i class="lg-t"></i>Batas KB</span>
+      </div>
+      <div class="dlnote">Tombol simpan tidak tersedia di tampilan ini. Buka halaman ini di browser secara langsung untuk menyimpan hasil kompres.</div>
+      <ul class="list" id="list"></ul>
+      <div class="empty" id="empty" hidden>Belum ada foto. Tarik beberapa foto ke area di atas untuk mulai.</div>
+    </section>
+  </div>
+
+  <!-- VIEW PDF -->
+  <div class="view" id="view-pdf" role="tabpanel" aria-labelledby="tab-pdf" hidden>
+    <section class="panel" aria-label="Pengaturan PDF">
+      <label class="drop" id="pdfDrop">
+        <input type="file" id="pdfFile" accept="application/pdf,.pdf" multiple>
+        <svg width="44" height="44" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4h14l8 8v22a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M24 4v8h8"/><path d="M14 22h12M14 28h8"/></svg>
+        <span class="big">Tarik file PDF ke sini</span>
+        <span class="sub">atau pilih dari perangkat Anda</span>
+        <span class="fake-btn">Pilih PDF</span>
+        <span class="formats">Boleh banyak PDF sekaligus. File tidak diunggah ke server.</span>
+      </label>
+
+      <div class="controls">
+        <div class="field">
+          <label class="label" for="pdfKb">Ukuran maksimum</label>
+          <div class="kbrow"><input id="pdfKb" type="number" min="10" max="50000" step="1" value="500" inputmode="numeric"><span class="unit">KB</span></div>
+          <input id="pdfRange" type="range" min="0" max="100" step="0.5" aria-label="Geser untuk mengubah ukuran maksimum PDF">
+          <div class="chips" id="pdfChips">
+            <button type="button" class="chip" data-kb="100">100 KB</button>
+            <button type="button" class="chip" data-kb="200">200 KB</button>
+            <button type="button" class="chip" data-kb="500">500 KB</button>
+            <button type="button" class="chip" data-kb="1024">1 MB</button>
+            <button type="button" class="chip" data-kb="2048">2 MB</button>
+            <button type="button" class="chip" data-kb="5120">5 MB</button>
+          </div>
+        </div>
+
+        <div class="two">
+          <div class="field">
+            <label class="label" for="pdfDpi">Resolusi maksimum</label>
+            <select id="pdfDpi" class="sel">
+              <option value="72">72 dpi (paling hemat)</option>
+              <option value="100">100 dpi</option>
+              <option value="150" selected>150 dpi (seimbang)</option>
+              <option value="200">200 dpi (lebih tajam)</option>
+            </select>
+          </div>
+          <label class="check" for="pdfGray">
+            <input type="checkbox" id="pdfGray">
+            <span><b>Ubah ke abu-abu</b><small>Hitam putih membuat file lebih kecil. Cocok untuk dokumen teks.</small></span>
+          </label>
+        </div>
+
+        <p class="notice">Agar bisa mengecil sampai batas, setiap halaman diubah menjadi gambar. Teks di dalam PDF tidak bisa lagi diseleksi atau dicari. PDF yang sudah di bawah batas tidak diubah.</p>
+      </div>
+    </section>
+
+    <section class="results" aria-label="Hasil PDF">
+      <div class="results-head">
+        <h2>Hasil PDF <span class="totals" id="pdfCount"></span></h2>
+        <div class="actions">
+          <button type="button" class="btn primary" id="pdfZipBtn">Simpan semua (.zip)</button>
+          <button type="button" class="btn" id="pdfClearBtn">Bersihkan</button>
+        </div>
+      </div>
+      <div class="totals" id="pdfTotals" aria-live="polite"></div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="lg-o"></i>Ukuran asli</span>
+        <span><i class="lg-n"></i>Ukuran hasil</span>
+        <span><i class="lg-t"></i>Batas KB</span>
+      </div>
+      <div class="dlnote">Tombol simpan tidak tersedia di tampilan ini. Buka halaman ini di browser secara langsung untuk menyimpan hasil kompres.</div>
+      <ul class="list" id="pdfList"></ul>
+      <div class="empty" id="pdfEmpty">Belum ada PDF. Tarik file PDF ke area di atas untuk mulai.</div>
+    </section>
+  </div>
+</main>
+
+<div class="toast-wrap"><div class="toast" id="toast" role="status" aria-live="polite"></div></div>
+
+<template id="rowT">
+  <li class="row" data-state="wait">
+    <div class="thumb"><img alt=""></div>
+    <div class="info"><div class="name"></div><div class="meta"></div></div>
+    <div class="sizes">
+      <div class="nums"><span class="from"></span><span class="arrow" aria-hidden="true">→</span><strong class="to"></strong><span class="pct"></span></div>
+      <div class="bar" aria-hidden="true"><i class="b-new"></i><i class="b-target"></i></div>
+      <div class="status"><span class="pill"><span class="g" aria-hidden="true"></span><span class="pill-t"></span></span><span class="note"></span></div>
+      <label class="own"><span>Batas khusus foto ini</span><input type="number" class="own-kb" min="5" max="20000" step="1" inputmode="numeric" aria-label="Batas KB khusus foto ini"><span>KB</span></label>
+    </div>
+    <div class="acts">
+      <button type="button" class="btn save">Simpan</button>
+      <button type="button" class="icon-btn rm" aria-label="Hapus foto ini" title="Hapus">×</button>
+    </div>
+  </li>
+</template>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
